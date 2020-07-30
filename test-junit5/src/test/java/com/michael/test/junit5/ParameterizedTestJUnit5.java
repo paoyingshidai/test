@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.util.StringUtils;
@@ -50,6 +51,21 @@ public class ParameterizedTestJUnit5 {
 
     }
 
+
+    /**
+     * classpath
+     * delimiterString: 制定分割符
+     * @param name
+     * @param age
+     */
+    @ParameterizedTest
+    @CsvSource(value = {"name,12", "Michael,13"}, delimiterString = ",")
+    @DisplayName("参数化测试-csv文件")
+    public void csvSource(String name, Integer age) {
+        System.out.println("name:" + name + ",age:" + age);
+        Assertions.assertNotNull(name);
+        Assertions.assertNotNull(age);
+    }
 
     /**
      * classpath
