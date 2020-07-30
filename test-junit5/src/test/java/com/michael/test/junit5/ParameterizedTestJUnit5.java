@@ -5,11 +5,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * 参数化
@@ -23,7 +27,7 @@ public class ParameterizedTestJUnit5 {
     @DisplayName("参数化测试1")
     public void parameterizedTest1(String string) {
         System.out.println(string);
-        Assertions.assertTrue(StringUtils.isNotBlank(string));
+        assertTrue(StringUtils.isNotBlank(string));
     }
 
 
@@ -80,5 +84,32 @@ public class ParameterizedTestJUnit5 {
         System.out.println("name:" + name + ",age:" + age);
         Assertions.assertNotNull(name);
         Assertions.assertNotNull(age);
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(ActivityLimitEnum.class)
+    @DisplayName("封顶和不封顶")
+    void test(ActivityLimitEnum activityLimitEnum) {
+        if (ActivityLimitEnum.LIMIT.equals(activityLimitEnum)) {
+            assertFalse(false);
+        }
+        else if (ActivityLimitEnum.UNLIMIT.equals(activityLimitEnum)) {
+            assertTrue(true);
+        }
+    }
+
+    enum ActivityLimitEnum {
+
+        LIMIT(1,"封顶"),
+        UNLIMIT(0,"上不封顶");
+
+        private int code;
+        private String name;
+
+        ActivityLimitEnum(int code, String name) {
+            this.code = code;
+            this.name = name;
+        }
     }
 }
