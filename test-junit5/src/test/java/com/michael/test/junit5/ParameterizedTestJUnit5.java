@@ -2,7 +2,12 @@ package com.michael.test.junit5;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -10,10 +15,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.util.StringUtils;
 
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * 参数化
@@ -36,13 +47,34 @@ public class ParameterizedTestJUnit5 {
     @DisplayName("方法来源参数")
     public void testWithExplicitLocalMethodSource(String name) {
         System.out.println(name);
-        Assertions.assertNotNull(name);
+        assertNotNull(name);
     }
 
     static Stream<String> method() {
         return Stream.of("apple", "banana");
     }
 
+
+    /**
+     * https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests
+     * @param str
+     * @param num
+     * @param list
+     */
+    @ParameterizedTest
+    @MethodSource("stringIntAndListProvider")
+    void testWithMultiArgMethodSource(String str, int num, List<String> list) {
+        assertEquals(5, str.length());
+        assertTrue(num >=1 && num <=2);
+        assertEquals(2, list.size());
+    }
+
+    static Stream<Arguments> stringIntAndListProvider() {
+        return Stream.of(
+                arguments("apple", 1, Arrays.asList("a", "b")),
+                arguments("lemon", 2, Arrays.asList("x", "y"))
+        );
+    }
 
     /**
      * TODO 自定义注解实现更复杂的注入
@@ -67,8 +99,8 @@ public class ParameterizedTestJUnit5 {
     @DisplayName("参数化测试-csv文件")
     public void csvSource(String name, Integer age) {
         System.out.println("name:" + name + ",age:" + age);
-        Assertions.assertNotNull(name);
-        Assertions.assertNotNull(age);
+        assertNotNull(name);
+        assertNotNull(age);
     }
 
     /**
@@ -82,8 +114,8 @@ public class ParameterizedTestJUnit5 {
     @DisplayName("参数化测试-csv文件")
     public void parameterizedTest2(String name, Integer age) {
         System.out.println("name:" + name + ",age:" + age);
-        Assertions.assertNotNull(name);
-        Assertions.assertNotNull(age);
+        assertNotNull(name);
+        assertNotNull(age);
     }
 
 
@@ -112,4 +144,27 @@ public class ParameterizedTestJUnit5 {
             this.name = name;
         }
     }
+
+
+    @ParameterizedTest
+    @ArgumentsSource(MyArgumentsProvider.class)
+    void testWithArgumentsSource(String argument) {
+        assertNotNull(argument);
+    }
+    public class MyArgumentsProvider implements ArgumentsProvider {
+
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Stream.of("apple", "banana").map(Arguments::of);
+        }
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = "SECONDS")
+    void testWithImplicitArgumentConversion(ChronoUnit argument) {
+        assertNotNull(argument.name());
+    }
+
+
 }
