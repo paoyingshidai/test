@@ -1,10 +1,14 @@
 package com.michael.test.junit5;
 
+import com.michael.test.junit5.object.Gender;
+import com.michael.test.junit5.object.Person;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -15,6 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
@@ -116,6 +121,32 @@ public class ParameterizedTestJUnit5 {
         System.out.println("name:" + name + ",age:" + age);
         assertNotNull(name);
         assertNotNull(age);
+    }
+
+    /**
+     * 这里使用 ArgumentsAccessor 来承接 csv 的参数
+     * 参数类型转换
+     * @param arguments
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "Jane, Doe, F, 1990-05-20",
+            "John, Doe, M, 1990-10-22"
+    })
+    public void testWithArgumentsAccessor(ArgumentsAccessor arguments) {
+        Person person = new Person(arguments.getString(0),
+                arguments.getString(1),
+                arguments.get(2, Gender.class),
+                arguments.get(3, LocalDate.class));
+
+        if (person.getFirstName().equals("Jane")) {
+            assertEquals(Gender.F, person.getGender());
+        }
+        else {
+            assertEquals(Gender.M, person.getGender());
+        }
+        assertEquals("Doe", person.getLastName());
+        assertEquals(1990, person.getDateOfBirth().getYear());
     }
 
 
