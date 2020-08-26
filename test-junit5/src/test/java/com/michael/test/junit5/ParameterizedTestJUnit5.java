@@ -1,5 +1,7 @@
 package com.michael.test.junit5;
 
+import com.michael.test.junit5.extention.JsonFileSource;
+import com.michael.test.junit5.extention.User;
 import com.michael.test.junit5.object.Gender;
 import com.michael.test.junit5.object.Person;
 import org.junit.jupiter.api.Assertions;
@@ -123,6 +125,7 @@ public class ParameterizedTestJUnit5 {
         assertNotNull(age);
     }
 
+
     /**
      * 这里使用 ArgumentsAccessor 来承接 csv 的参数
      * 参数类型转换
@@ -174,6 +177,17 @@ public class ParameterizedTestJUnit5 {
             this.code = code;
             this.name = name;
         }
+    }
+
+
+    /**
+     * classpath
+     */
+    @ParameterizedTest
+    @JsonFileSource(resources = "/test.json")
+    @DisplayName("参数化测试-json文件")
+    public void parameterizedTestJson(User user) {
+        System.out.println("username:" + user.getUsername() + ",password:" + user.getPassword());
     }
 
 
