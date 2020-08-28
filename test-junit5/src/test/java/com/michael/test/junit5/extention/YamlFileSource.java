@@ -15,11 +15,11 @@ import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @API(status = EXPERIMENTAL, since = "5.0")
-@ArgumentsSource(JsonFileArgumentsProvider.class)
-public @interface JsonFileSource {
+@ArgumentsSource(YamlFileArgumentsProvider.class)
+public @interface YamlFileSource {
 
     /**
-     * The JSON classpath resources to use as the sources of arguments; must not be
+     * The Yaml classpath resources to use as the sources of arguments; must not be
      * empty.
      */
     String[] resources();

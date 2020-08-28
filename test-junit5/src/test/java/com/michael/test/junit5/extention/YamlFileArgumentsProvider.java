@@ -1,8 +1,10 @@
 package com.michael.test.junit5.extention;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.SneakyThrows;
-import org.apache.commons.io.IOUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -12,6 +14,7 @@ import org.junit.platform.commons.util.Preconditions;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -20,25 +23,26 @@ import java.util.stream.Stream;
 /**
  * @author Michael
  */
-class JsonFileArgumentsProvider implements ArgumentsProvider, AnnotationConsumer<JsonFileSource> {
+@Slf4j
+class YamlFileArgumentsProvider implements ArgumentsProvider, AnnotationConsumer<YamlFileSource> {
 
     private final BiFunction<Class<?>, String, InputStream> inputStreamProvider;
 
-    private JsonFileSource annotation;
+    private YamlFileSource annotation;
     private String[] resources;
     private Charset charset;
     private Class targetClass;
 
-    JsonFileArgumentsProvider() {
+    YamlFileArgumentsProvider() {
         this(Class::getResourceAsStream);
     }
 
-    JsonFileArgumentsProvider(BiFunction<Class<?>, String, InputStream> inputStreamProvider) {
+    YamlFileArgumentsProvider(BiFunction<Class<?>, String, InputStream> inputStreamProvider) {
         this.inputStreamProvider = inputStreamProvider;
     }
 
     @Override
-    public void accept(JsonFileSource annotation) {
+    public void accept(YamlFileSource annotation) {
         this.annotation = annotation;
         this.resources = annotation.resources();
         this.targetClass = annotation.targetClass();
@@ -60,23 +64,23 @@ class JsonFileArgumentsProvider implements ArgumentsProvider, AnnotationConsumer
                 () -> "Classpath resource [" + resource + "] does not exist");
     }
 
-    private String beginParsing(InputStream inputStream) {
+    private List beginParsing(InputStream inputStream) {
         try {
-            String string = IOUtils.toString(inputStream, charset);
-            return string;
+            ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+            JavaType javaType = objectMapper.getTypeFactory().constructParametricType(List.class, this.targetClass);
+            return objectMapper.readValue(inputStream, javaType);
         } catch (Throwable throwable) {
-
+            log.error("parsing yaml file error, error: {}", throwable.getMessage());
         }
-        return "";
+        return new ArrayList(0);
     }
 
     @SneakyThrows
-    private Stream<Arguments> toStream(String input) {
-        List contexts = JSON.parseArray(input, targetClass);
-        return contexts.stream().map(Arguments::arguments);
+    private Stream<Arguments> toStream(List input) {
+        return input.stream().map(Arguments::arguments);
     }
 
-    private Charset getCharsetFrom(JsonFileSource annotation) {
+    private Charset getCharsetFrom(YamlFileSource annotation) {
         try {
             return Charset.forName(annotation.encoding());
         } catch (Exception ex) {

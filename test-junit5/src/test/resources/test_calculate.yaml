@@ -1,0 +1,34 @@
+- bankerId: 8480
+  minBetAmount: 2
+  playerArgs:
+    - playerId: 8480
+      balance: 8.89
+      multiple: 1
+      tileType: 2
+      result: 1
+    - playerId: 8484
+      balance: 16
+      multiple: 11
+      tileType: 2
+      result: -1
+    - playerId: 8485
+      balance: 16
+      multiple: 15
+      tileType: 2
+      result: -1
+    - playerId: 8478
+      balance: 8.89
+      multiple: 11
+      tileType: 2
+      result: -1
+    - playerId: 8479
+      balance: 31.2
+      multiple: 11
+      tileType: 2
+      result: -1
+  expectMap:
+    8480: 8.45
+    8484: -2.22
+    8485: -2.22
+    8478: -2.22
+    8479: -2.22
